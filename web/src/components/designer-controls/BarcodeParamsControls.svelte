@@ -11,10 +11,15 @@
 
   let { selectedBarcode, editRevision, valueUpdated }: Props = $props();
 
-  function generateRandomCode(length: number) {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let randomLength = $state(6);
+  let randomType = $state<"alnum" | "num">("num");
+
+  function generateRandomCode() {
+    const charsAlnum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const charsNum = "0123456789";
+    const chars = randomType === "num" ? charsNum : charsAlnum;
     let result = "";
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < randomLength; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     selectedBarcode?.set("text", result);
@@ -103,18 +108,34 @@
       valueUpdated();
     }}></textarea>
   {#if selectedBarcode.encoding === "CODE128B"}
-    <div class="d-flex justify-content-end mt-1 gap-2">
+    <div class="mt-2 p-2 border rounded">
+      <div class="d-flex align-items-center mb-2 gap-2">
+        <MdIcon icon="casino" /> <strong>{$tr("params.barcode.random_generator")}</strong>
+      </div>
+      
+      <div class="d-flex gx-2 align-items-center gap-2 mb-2">
+        <label class="form-label mb-0 col-auto">{$tr("params.barcode.random_length")}:</label>
+        <input 
+          type="number" 
+          class="form-control form-control-sm" 
+          style="width: 70px;"
+          min="1" 
+          max="100" 
+          bind:value={randomLength} />
+      </div>
+      
+      <div class="d-flex gx-2 align-items-center gap-2 mb-2">
+        <label class="form-label mb-0 col-auto">{$tr("params.barcode.random_type")}:</label>
+        <select class="form-select form-select-sm" bind:value={randomType}>
+          <option value="num">{$tr("params.barcode.random_type.num")}</option>
+          <option value="alnum">{$tr("params.barcode.random_type.alnum")}</option>
+        </select>
+      </div>
+      
       <button 
-        class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" 
-        title={$tr("params.barcode.generate_random_short")} 
-        onclick={() => generateRandomCode(6)}>
-        <MdIcon icon="casino" /> {$tr("params.barcode.generate_random_short")}
-      </button>
-      <button 
-        class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" 
-        title={$tr("params.barcode.generate_random_long")} 
-        onclick={() => generateRandomCode(12)}>
-        <MdIcon icon="casino" /> {$tr("params.barcode.generate_random_long")}
+        class="btn btn-sm btn-outline-secondary w-100 mt-1 d-flex justify-content-center align-items-center gap-1" 
+        onclick={generateRandomCode}>
+        {$tr("params.barcode.generate_random")}
       </button>
     </div>
   {/if}
