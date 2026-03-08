@@ -1,0 +1,38 @@
+{
+  "teams": [
+    {
+      "name": "python-backend",
+      "tag": "@backend",
+      "description": "Responsible for the Python CLI tool, protocol implementation, and core library.",
+      "focus_directories": [
+        "fichero",
+        "tests"
+      ],
+      "key_files": [
+        "pyproject.toml",
+        "uv.lock"
+      ]
+    },
+    {
+      "name": "web-frontend",
+      "tag": "@frontend",
+      "description": "Responsible for the Web GUI using Svelte 5 and Fabric.js.",
+      "focus_directories": [
+        "web"
+      ]
+    },
+    {
+      "name": "documentation",
+      "tag": "@docs",
+      "description": "Handles project documentation and protocol specifications.",
+      "focus_directories": [
+        "docs"
+      ],
+      "key_files": [
+        "README.md",
+        "GEMINI.md",
+        "docs/PROTOCOL.md"
+      ]
+    }
+  ]
+}
