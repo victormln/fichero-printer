@@ -6,6 +6,16 @@ Blog post: [Reverse Engineering Action's Cheap Fichero Labelprinter](https://blo
 
 The [Fichero](https://www.action.com/nl-nl/p/3212141/fichero-labelprinter/) is a cheap Bluetooth thermal label printer sold at Action. Internally it's an AiYin D11s made by Xiamen Print Future Technology. The official app is closed-source and doesn't expose the protocol, so this project reverse-engineers it from the decompiled APK.
 
+## 🍴 Fork Improvements (`victormln`)
+
+This is a fork of the excellent [0xMH's project](https://github.com/0xMH/fichero-printer). The following improvements and fixes have been added:
+- **Barcode Enhancements:** Added an option to easily generate random Code128 B barcodes from the Web GUI.
+- **Improved Resizing:** Fixed how barcodes scale visually on the canvas so they maintain their correct proportions when resizing with corner handles.
+- **Preview Fixes:** Corrected a bug where barcodes would render thicker or distorted in the print preview modal.
+- **Maintenance:** Resolved NPM package deprecations and warnings, keeping the frontend stack up to date.
+
+---
+
 ## The printer
 
 - 96px wide printhead, 203 DPI
@@ -49,7 +59,7 @@ One more reason to ditch the app and talk to the printer directly.
 
 ## Web GUI
 
-Try it at https://0xmh.github.io/fichero-printer/ - a full label designer with text, images, barcodes, QR codes, and drag-and-drop canvas editing. Built with Svelte 5 and Fabric.js, ported from the NiimBlue project (MIT).
+Try it at **[https://victormln.github.io/fichero-printer/](https://victormln.github.io/fichero-printer/)** - a full label designer with text, images, barcodes, QR codes, and drag-and-drop canvas editing. Built with Svelte 5 and Fabric.js, ported from the NiimBlue project (MIT).
 
 Click the Bluetooth icon, pair with the printer, and start designing. Labels save to browser localStorage. Export as JSON or PNG.
 
