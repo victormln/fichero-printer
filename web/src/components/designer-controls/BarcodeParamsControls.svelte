@@ -10,6 +10,19 @@
   }
 
   let { selectedBarcode, editRevision, valueUpdated }: Props = $props();
+
+  function generateRandomCode() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < 12; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    selectedBarcode?.set("text", result);
+    if (selectedBarcode?.canvas) {
+      selectedBarcode.canvas.centerObject(selectedBarcode);
+    }
+    valueUpdated();
+  }
 </script>
 
 <input type="hidden" value={editRevision}>
@@ -88,6 +101,16 @@
       selectedBarcode?.set("text", e.currentTarget.value);
       valueUpdated();
     }}></textarea>
+  {#if selectedBarcode.encoding === "CODE128B"}
+    <div class="d-flex justify-content-end mt-1">
+      <button 
+        class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" 
+        title={$tr("params.barcode.generate_random")} 
+        onclick={generateRandomCode}>
+        <MdIcon icon="casino" /> {$tr("params.barcode.generate_random")}
+      </button>
+    </div>
+  {/if}
 {/if}
 
 <style>

@@ -36,6 +36,7 @@
     "params.barcode.encoding": "Codificación",
     "params.barcode.font_size": "Tamaño de fuente",
     "params.barcode.scale": "Factor de escala",
+    "params.barcode.generate_random": "Generar código aleatorio",
     "params.csv.enabled": "Activado",
     "params.csv.placeholders": "Variables:",
     "params.csv.rowsfound": "Filas de datos encontradas:",

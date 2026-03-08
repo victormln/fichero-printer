@@ -101,8 +101,6 @@ export class Barcode<
       tr: false,
       bl: false,
       br: false,
-      ml: false,
-      mr: false,
       mtr: false,
     });
     this.objectCaching = false;
