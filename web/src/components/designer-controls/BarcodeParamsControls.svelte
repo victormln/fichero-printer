@@ -11,10 +11,10 @@
 
   let { selectedBarcode, editRevision, valueUpdated }: Props = $props();
 
-  function generateRandomCode() {
+  function generateRandomCode(length: number) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let result = "";
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     selectedBarcode?.set("text", result);
@@ -103,12 +103,18 @@
       valueUpdated();
     }}></textarea>
   {#if selectedBarcode.encoding === "CODE128B"}
-    <div class="d-flex justify-content-end mt-1">
+    <div class="d-flex justify-content-end mt-1 gap-2">
       <button 
         class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" 
-        title={$tr("params.barcode.generate_random")} 
-        onclick={generateRandomCode}>
-        <MdIcon icon="casino" /> {$tr("params.barcode.generate_random")}
+        title={$tr("params.barcode.generate_random_short")} 
+        onclick={() => generateRandomCode(6)}>
+        <MdIcon icon="casino" /> {$tr("params.barcode.generate_random_short")}
+      </button>
+      <button 
+        class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" 
+        title={$tr("params.barcode.generate_random_long")} 
+        onclick={() => generateRandomCode(12)}>
+        <MdIcon icon="casino" /> {$tr("params.barcode.generate_random_long")}
       </button>
     </div>
   {/if}
