@@ -48,7 +48,8 @@
   <input
     class="barcode-width form-control"
     type="number"
-    min="1"
+    min="0.1"
+    step="0.1"
     value={selectedBarcode.scaleFactor}
     oninput={(e) => {
       selectedBarcode?.set("scaleFactor", e.currentTarget.valueAsNumber ?? 1);
@@ -87,7 +88,7 @@
     <input
       class="barcode-content form-control"
       maxlength="12"
-      value={selectedBarcode.text}
+      value={editRevision !== -1 ? selectedBarcode.text : ""}
       oninput={(e) => {
         selectedBarcode?.set("text", e.currentTarget.value);
         valueUpdated();
@@ -96,7 +97,7 @@
 {:else}
   <textarea
     class="barcode-content form-control"
-    value={selectedBarcode.text}
+    value={editRevision !== -1 ? selectedBarcode.text : ""}
     oninput={(e) => {
       selectedBarcode?.set("text", e.currentTarget.value);
       valueUpdated();

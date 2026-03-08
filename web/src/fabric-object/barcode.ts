@@ -27,10 +27,10 @@ interface UniqueBarcodeProps {
 }
 export interface BarcodeProps
   extends fabric.FabricObjectProps,
-    UniqueBarcodeProps {}
+  UniqueBarcodeProps { }
 export interface SerializedBarcodeProps
   extends fabric.SerializedObjectProps,
-    UniqueBarcodeProps {}
+  UniqueBarcodeProps { }
 const BARCODE_PROPS = [
   "text",
   "encoding",
@@ -41,13 +41,12 @@ const BARCODE_PROPS = [
 ] as const;
 
 export class Barcode<
-    Props extends fabric.TOptions<BarcodeProps> = Partial<BarcodeProps>,
-    SProps extends SerializedBarcodeProps = SerializedBarcodeProps,
-    EventSpec extends fabric.ObjectEvents = fabric.ObjectEvents,
-  >
+  Props extends fabric.TOptions<BarcodeProps> = Partial<BarcodeProps>,
+  SProps extends SerializedBarcodeProps = SerializedBarcodeProps,
+  EventSpec extends fabric.ObjectEvents = fabric.ObjectEvents,
+>
   extends fabric.FabricObject<Props, SProps, EventSpec>
-  implements BarcodeProps
-{
+  implements BarcodeProps {
   static override type = "Barcode";
 
   /**
@@ -97,10 +96,6 @@ export class Barcode<
     this.setOptions(other); // Must be set separately because the encoding needs to be set first
     this.set("text", text);
     this.setControlsVisibility({
-      tl: false,
-      tr: false,
-      bl: false,
-      br: false,
       mtr: false,
     });
     this.objectCaching = false;
@@ -114,10 +109,16 @@ export class Barcode<
       this._createBandCode();
     }
 
-    if (
+    if (key === "width" && this.barcodeEncoded && this.canvas) {
+      // User or CanvasUtils changed the width, update our scaleFactor
+      const letterWidth = this._measureLetterWidth();
+      const margins = this.encoding === "EAN13" ? letterWidth * 2 : 0;
+      this.scaleFactor = Math.max(0.1, (value - margins) / this.barcodeEncoded.length);
+    } else if (
       this.barcodeEncoded &&
       (BARCODE_PROPS.includes(key as any) || key == "canvas")
     ) {
+      // A property like scaleFactor or text changed, update our width
       const letterWidth = this._measureLetterWidth();
       let barcodeWidth = (this.scaleFactor ?? 1) * this.barcodeEncoded.length;
 

@@ -144,6 +144,7 @@ export class LabelDesignerObjectHelper {
       ...OBJECT_DEFAULTS,
     });
     canvas.add(qr);
+    canvas.centerObject(qr);
     return qr;
   }
 
@@ -155,6 +156,7 @@ export class LabelDesignerObjectHelper {
       encoding: "CODE128B",
     });
     canvas.add(barcode);
+    canvas.centerObject(barcode);
     return barcode;
   }
 
