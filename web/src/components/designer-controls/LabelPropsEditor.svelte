@@ -38,9 +38,9 @@
   let labelPresets = $state<LabelPreset[]>(DEFAULT_LABEL_PRESETS);
 
   let title = $state<string | undefined>("");
-  let prevUnit: LabelUnit = "mm";
-  let unit = $state<LabelUnit>("mm");
-  let dpmm = $state<number>(8);
+  let unit = $state<LabelUnit>((localStorage.getItem("label_props_unit") || "mm") as LabelUnit);
+  let prevUnit: LabelUnit = unit;
+  let dpmm = $state<number>(parseInt(localStorage.getItem("label_props_dpmm") || "8", 10));
   let width = $state<number>(0);
   let height = $state<number>(0);
   let printDirection = $state<PrintDirection>("left");
@@ -233,8 +233,6 @@
     const defaultPreset: LabelPreset = DEFAULT_LABEL_PRESETS[0];
     width = defaultPreset.width;
     height = defaultPreset.height;
-    prevUnit = defaultPreset.unit;
-    unit = defaultPreset.unit;
     printDirection = defaultPreset.printDirection;
     shape = defaultPreset.shape ?? "rect";
     split = defaultPreset.split ?? "none";
@@ -252,6 +250,11 @@
     }
 
     tick().then(() => fillWithCurrentParams());
+  });
+
+  $effect(() => {
+    localStorage.setItem("label_props_unit", unit);
+    localStorage.setItem("label_props_dpmm", dpmm.toString());
   });
 
   $effect(() => {

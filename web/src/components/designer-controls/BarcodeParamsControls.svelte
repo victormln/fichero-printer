@@ -11,8 +11,13 @@
 
   let { selectedBarcode, editRevision, valueUpdated }: Props = $props();
 
-  let randomLength = $state(6);
-  let randomType = $state<"alnum" | "num">("num");
+  let randomLength = $state(parseInt(localStorage.getItem("barcode_random_length") || "6", 10));
+  let randomType = $state<"alnum" | "num">((localStorage.getItem("barcode_random_type") || "num") as "alnum" | "num");
+
+  $effect(() => {
+    localStorage.setItem("barcode_random_length", randomLength.toString());
+    localStorage.setItem("barcode_random_type", randomType);
+  });
 
   function generateRandomCode() {
     const charsAlnum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
