@@ -85,7 +85,7 @@ export class LabelDesignerObjectHelper {
   static addText(canvas: fabric.Canvas, text?: string, options?: Partial<TextboxExtProps>): TextboxExt {
     const obj = new TextboxExt(text ?? "Text", {
       ...OBJECT_DEFAULTS_TEXT,
-      ...options,
+      ...(options as any),
     });
     canvas.add(obj);
     canvas.centerObject(obj);
@@ -95,7 +95,7 @@ export class LabelDesignerObjectHelper {
   static addStaticText(canvas: fabric.Canvas, text?: string, options?: Partial<fabric.TextProps>): fabric.FabricText {
     const obj = new fabric.FabricText(text ?? "Text", {
       ...OBJECT_DEFAULTS_TEXT,
-      ...options,
+      ...(options as any),
     });
     canvas.add(obj);
     canvas.centerObject(obj);

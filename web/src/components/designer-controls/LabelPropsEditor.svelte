@@ -39,7 +39,7 @@
 
   let title = $state<string | undefined>("");
   let unit = $state<LabelUnit>((localStorage.getItem("label_props_unit") || "mm") as LabelUnit);
-  let prevUnit: LabelUnit = unit;
+  let prevUnit: LabelUnit = (localStorage.getItem("label_props_unit") || "mm") as LabelUnit;
   let dpmm = $state<number>(parseInt(localStorage.getItem("label_props_dpmm") || "8", 10));
   let width = $state<number>(0);
   let height = $state<number>(0);

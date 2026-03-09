@@ -119,8 +119,9 @@
       </div>
       
       <div class="d-flex gx-2 align-items-center gap-2 mb-2">
-        <label class="form-label mb-0 col-auto">{$tr("params.barcode.random_length")}:</label>
+        <label class="form-label mb-0 col-auto" for="barcode-random-length">{$tr("params.barcode.random_length")}:</label>
         <input 
+          id="barcode-random-length"
           type="number" 
           class="form-control form-control-sm" 
           style="width: 70px;"
@@ -130,8 +131,8 @@
       </div>
       
       <div class="d-flex gx-2 align-items-center gap-2 mb-2">
-        <label class="form-label mb-0 col-auto">{$tr("params.barcode.random_type")}:</label>
-        <select class="form-select form-select-sm" bind:value={randomType}>
+        <label class="form-label mb-0 col-auto" for="barcode-random-type">{$tr("params.barcode.random_type")}:</label>
+        <select id="barcode-random-type" class="form-select form-select-sm" bind:value={randomType}>
           <option value="num">{$tr("params.barcode.random_type.num")}</option>
           <option value="alnum">{$tr("params.barcode.random_type.alnum")}</option>
         </select>

@@ -49,6 +49,7 @@
   let csvEnabled = $state<boolean>(false);
   let windowWidth = $state<number>(0);
   let undoState = $state<UndoState>({ undoDisabled: false, redoDisabled: false });
+  let activeTab = $state<"add" | "edit" | "label" | "print">("add");
 
   const undo = new UndoRedo();
 
@@ -346,18 +347,21 @@
       selectedCount = e.selected?.length ?? 0;
       selectedObject = e.selected?.length === 1 ? e.selected[0] : undefined;
       editRevision++;
+      if (selectedCount > 0) activeTab = "edit";
     });
 
     fabricCanvas.on("selection:updated", (e): void => {
       selectedCount = e.selected?.length ?? 0;
       selectedObject = e.selected?.length === 1 ? e.selected[0] : undefined;
       editRevision++;
+      if (selectedCount > 0) activeTab = "edit";
     });
 
     fabricCanvas.on("selection:cleared", (): void => {
       selectedObject = undefined;
       selectedCount = 0;
       editRevision++;
+      if (activeTab === "edit") activeTab = "add";
     });
 
     fabricCanvas.on("dragover", (e): void => {
@@ -444,93 +448,126 @@
     </div>
   </div>
 
-  <div class="row mb-1">
-    <div class="col d-flex justify-content-center">
-      <div class="toolbar d-flex flex-wrap gap-1 justify-content-center align-items-center">
-        <LabelPropsEditor {labelProps} onChange={onUpdateLabelProps} />
-
-        <button class="btn btn-sm btn-secondary" onclick={clearCanvas} title={$tr("editor.clear")}>
-          <MdIcon icon="cancel_presentation" />
-        </button>
-
+  <div class="row mb-2">
+    <div class="col d-flex justify-content-center position-relative">
+      <div class="toolbar d-flex flex-wrap gap-2 justify-content-center align-items-center">
         <SavedLabelsMenu
           canvas={fabricCanvas!}
           onRequestLabelTemplate={exportCurrentLabel}
           {onLoadRequested}
           {csvEnabled} />
 
-        <button
-          class="btn btn-sm btn-secondary"
-          disabled={undoState.undoDisabled}
-          onclick={() => undo.undo()}
-          title={$tr("editor.undo")}>
+        <button class="btn btn-sm btn-outline-danger shadow-sm bg-body" onclick={clearCanvas} title={$tr("editor.clear")}>
+          <MdIcon icon="cancel_presentation" />
+        </button>
+
+        <!-- Floating undo/redo -->
+        <button class="btn btn-sm btn-outline-secondary shadow-sm bg-body" disabled={undoState.undoDisabled} onclick={() => undo.undo()} title={$tr("editor.undo")}>
           <MdIcon icon="undo" />
         </button>
-
-        <button
-          class="btn btn-sm btn-secondary"
-          disabled={undoState.redoDisabled}
-          onclick={() => undo.redo()}
-          title={$tr("editor.redo")}>
+        <button class="btn btn-sm btn-outline-secondary shadow-sm bg-body" disabled={undoState.redoDisabled} onclick={() => undo.redo()} title={$tr("editor.redo")}>
           <MdIcon icon="redo" />
         </button>
-
-        <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={onCsvPlaceholderPicked} />
-
-        <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
-        <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} />
-
-        <button class="btn btn-sm btn-primary ms-1" onclick={openPreview}>
-          <MdIcon icon="visibility" />
-          {$tr("editor.preview")}
-        </button>
-        <button
-          title="Print with default or saved parameters"
-          class="btn btn-sm btn-primary ms-1"
-          onclick={openPreviewAndPrint}
-          disabled={$connectionState !== "connected"}><MdIcon icon="print" /> {$tr("editor.print")}</button>
       </div>
     </div>
   </div>
 
-  <div class="row mb-1">
-    <div class="col d-flex justify-content-center">
-      <div class="toolbar d-flex flex-wrap gap-1 justify-content-center align-items-center">
-        {#if selectedCount > 0}
-          <button class="btn btn-sm btn-danger me-1" onclick={deleteSelected} title={$tr("editor.delete")}>
-            <MdIcon icon="delete" />
-          </button>
+  <div class="row mb-3">
+    <div class="col">
+      <div class="controls-panel">
+        {#if activeTab === "add"}
+          <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center">
+            <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
+            <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} />
+          </div>
+        {:else if activeTab === "edit"}
+          <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center">
+            {#if selectedCount > 0}
+              <button class="btn btn-sm btn-danger shadow-sm" onclick={deleteSelected} title={$tr("editor.delete")}>
+                <MdIcon icon="delete" />
+              </button>
+              <button class="btn btn-sm btn-secondary shadow-sm" onclick={cloneSelected} title={$tr("editor.clone")}>
+                <MdIcon icon="content_copy" />
+              </button>
+            {:else}
+              <div class="text-muted small">Select an object to edit</div>
+            {/if}
+
+            {#if selectedObject && selectedCount === 1}
+              <GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+            {/if}
+
+            {#if selectedObject}
+              <VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+            {/if}
+
+            {#if selectedObject instanceof fabric.IText}
+              <TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+            {/if}
+
+            {#if selectedObject instanceof QRCode}
+              <QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+            {/if}
+
+            {#if selectedObject instanceof Barcode}
+              <BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+            {/if}
+
+            {#if selectedObject instanceof fabric.IText || selectedObject instanceof QRCode || (selectedObject instanceof Barcode && selectedObject.encoding === "CODE128B")}
+              <VariableInsertControl {selectedObject} valueUpdated={controlValueUpdated} />
+            {/if}
+          </div>
+        {:else if activeTab === "label"}
+          <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center">
+            <LabelPropsEditor {labelProps} onChange={onUpdateLabelProps} />
+
+            <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={onCsvPlaceholderPicked} />
+          </div>
+        {:else if activeTab === "print"}
+          <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center">
+            <button class="btn btn-sm btn-primary shadow-sm" onclick={openPreview}>
+              <MdIcon icon="visibility" />
+              {$tr("editor.preview")}
+            </button>
+            <button
+              title="Print with default or saved parameters"
+              class="btn btn-sm btn-primary shadow-sm"
+              onclick={openPreviewAndPrint}
+              disabled={$connectionState !== "connected"}><MdIcon icon="print" /> {$tr("editor.print")}</button>
+          </div>
         {/if}
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-auto">
+    <div class="col">
+      <div class="btn-group w-100 shadow-sm" role="group">
+        <input type="radio" class="btn-check" name="tab-radio" id="tab-add" autocomplete="off" checked={activeTab === 'add'} onchange={() => activeTab = 'add'}>
+        <label class="btn btn-outline-secondary d-flex flex-column align-items-center py-2" for="tab-add">
+          <MdIcon icon="add_box" />
+          <small style="font-size: 0.70em">{$tr("editor.tab.add")}</small>
+        </label>
 
         {#if selectedCount > 0}
-          <button class="btn btn-sm btn-secondary me-1" onclick={cloneSelected} title={$tr("editor.clone")}>
-            <MdIcon icon="content_copy" />
-          </button>
+          <input type="radio" class="btn-check" name="tab-radio" id="tab-edit" autocomplete="off" checked={activeTab === 'edit'} onchange={() => activeTab = 'edit'}>
+          <label class="btn btn-outline-secondary d-flex flex-column align-items-center py-2" for="tab-edit">
+            <MdIcon icon="edit" />
+            <small style="font-size: 0.70em">{$tr("editor.tab.edit")}</small>
+          </label>
         {/if}
 
-        {#if selectedObject && selectedCount === 1}
-          <GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
+        <input type="radio" class="btn-check" name="tab-radio" id="tab-label" autocomplete="off" checked={activeTab === 'label'} onchange={() => activeTab = 'label'}>
+        <label class="btn btn-outline-secondary d-flex flex-column align-items-center py-2" for="tab-label">
+          <MdIcon icon="settings" />
+          <small style="font-size: 0.70em">{$tr("editor.tab.label")}</small>
+        </label>
 
-        {#if selectedObject}
-          <VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof fabric.IText}
-          <TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof QRCode}
-          <QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof Barcode}
-          <BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof fabric.IText || selectedObject instanceof QRCode || (selectedObject instanceof Barcode && selectedObject.encoding === "CODE128B")}
-          <VariableInsertControl {selectedObject} valueUpdated={controlValueUpdated} />
-        {/if}
+        <input type="radio" class="btn-check" name="tab-radio" id="tab-print" autocomplete="off" checked={activeTab === 'print'} onchange={() => activeTab = 'print'}>
+        <label class="btn btn-outline-secondary d-flex flex-column align-items-center py-2" for="tab-print">
+          <MdIcon icon="print" />
+          <small style="font-size: 0.70em">{$tr("editor.tab.print")}</small>
+        </label>
       </div>
     </div>
   </div>

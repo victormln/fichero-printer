@@ -198,7 +198,7 @@
 </script>
 
 <div class="dropdown">
-  <button class="btn btn-sm btn-secondary" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+  <button class="btn btn-sm btn-outline-secondary shadow-sm bg-body" data-bs-toggle="dropdown" data-bs-auto-close="outside">
     <MdIcon icon="sd_storage" />
   </button>
   <div class="saved-labels dropdown-menu" bind:this={dropdownRef}>
