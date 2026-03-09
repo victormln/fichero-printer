@@ -28,7 +28,7 @@
 
 <div class="dropdown">
   <button
-    class="btn btn-sm btn-{enabled ? 'warning' : 'secondary'}"
+    class="btn btn-sm btn-{enabled ? 'warning' : 'outline-secondary'} shadow-sm bg-body"
     data-bs-toggle="dropdown"
     data-bs-auto-close="outside"
     title={$tr("params.csv.title")}>

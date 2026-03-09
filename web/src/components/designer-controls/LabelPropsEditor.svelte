@@ -271,7 +271,7 @@
 </script>
 
 <div class="dropdown">
-  <button class="btn btn-sm btn-secondary" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+  <button class="btn btn-sm btn-outline-secondary shadow-sm bg-body" data-bs-toggle="dropdown" data-bs-auto-close="outside">
     <MdIcon icon="settings" />
   </button>
   <div class="dropdown-menu">
