@@ -5,6 +5,12 @@
   import { locale, locales, tr } from "$/utils/i18n";
   import DebugStuff from "$/components/DebugStuff.svelte";
   import MdIcon from "$/components/basic/MdIcon.svelte";
+  import LabelPropsEditor from "$/components/designer-controls/LabelPropsEditor.svelte";
+  import CsvControl from "$/components/designer-controls/CsvControl.svelte";
+  import SavedLabelsMenu from "$/components/designer-controls/SavedLabelsMenu.svelte";
+  import { DEFAULT_LABEL_PROPS } from "$/defaults";
+  import type { LabelProps } from "$/types";
+  import { CustomCanvas } from "$/fabric-object/custom_canvas";
 
   // eslint-disable-next-line no-undef
   const appCommit = __APP_COMMIT__;
@@ -12,6 +18,10 @@
   const buildDate = __BUILD_DATE__;
 
   let debugStuffShow = $state<boolean>(false);
+  let designer = $state<any>();
+  let labelProps = $state<LabelProps>(DEFAULT_LABEL_PROPS);
+  let csvEnabled = $state<boolean>(false);
+  let fabricCanvas = $state<CustomCanvas | undefined>();
 </script>
 
 <div class="container my-2">
@@ -21,7 +31,18 @@
         <img src="{import.meta.env.BASE_URL}logo.png" alt="Fichero" class="logo" />
       </h1>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-6 d-flex gap-2 align-items-center justify-content-end">
+      {#if designer}
+        <div class="d-flex gap-1">
+          <LabelPropsEditor {labelProps} onChange={designer.onUpdateLabelProps} />
+          <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={designer.onCsvPlaceholderPicked} />
+          <SavedLabelsMenu
+            canvas={fabricCanvas!}
+            onRequestLabelTemplate={designer.exportCurrentLabel}
+            onLoadRequested={designer.onLoadRequested}
+            {csvEnabled} />
+        </div>
+      {/if}
       <PrinterConnector />
     </div>
   </div>
@@ -33,7 +54,7 @@
 
   <div class="row">
     <div class="col">
-      <LabelDesigner />
+      <LabelDesigner bind:this={designer} bind:labelProps bind:csvEnabled bind:fabricCanvas />
     </div>
   </div>
 </div>

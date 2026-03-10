@@ -39,14 +39,23 @@
 
   let htmlCanvas: HTMLCanvasElement;
 
-  let fabricCanvas = $state<CustomCanvas>();
-  let labelProps = $state<LabelProps>(DEFAULT_LABEL_PROPS);
+  interface Props {
+    labelProps?: LabelProps;
+    csvEnabled?: boolean;
+    fabricCanvas?: CustomCanvas;
+  }
+
+  let {
+    labelProps = $bindable(DEFAULT_LABEL_PROPS),
+    csvEnabled = $bindable(false),
+    fabricCanvas = $bindable()
+  }: Props = $props();
+
   let previewOpened = $state<boolean>(false);
   let selectedObject = $state<fabric.FabricObject | undefined>(undefined);
   let selectedCount = $state<number>(0);
   let editRevision = $state<number>(0);
   let printNow = $state<boolean>(false);
-  let csvEnabled = $state<boolean>(false);
   let windowWidth = $state<number>(0);
   let undoState = $state<UndoState>({ undoDisabled: false, redoDisabled: false });
 
@@ -147,7 +156,7 @@
     }
   };
 
-  const onUpdateLabelProps = (newProps: LabelProps) => {
+  export const onUpdateLabelProps = (newProps: LabelProps) => {
     labelProps = newProps;
     fabricCanvas!.setDimensions(labelProps.size);
     fabricCanvas!.virtualZoom(fabricCanvas!.getVirtualZoom());
@@ -159,11 +168,11 @@
     }
   };
 
-  const exportCurrentLabel = (): ExportedLabelTemplate => {
+  export const exportCurrentLabel = (): ExportedLabelTemplate => {
     return FileUtils.makeExportedLabel(fabricCanvas!, labelProps, csvEnabled);
   };
 
-  const onLoadRequested = (label: ExportedLabelTemplate) => {
+  export const onLoadRequested = (label: ExportedLabelTemplate) => {
     loadLabelData(label).then(() => undo.push(fabricCanvas!, labelProps));
   };
 
@@ -220,7 +229,7 @@
     return fabricCanvas!.toJSON();
   };
 
-  const onCsvPlaceholderPicked = (name: string) => {
+  export const onCsvPlaceholderPicked = (name: string) => {
     const obj = LabelDesignerObjectHelper.addText(fabricCanvas!, `{${name}}`, {
       textAlign: "left",
       originX: "left",
@@ -447,16 +456,6 @@
   <div class="row mb-2">
     <div class="col d-flex justify-content-center position-relative">
       <div class="toolbar d-flex flex-wrap gap-2 justify-content-center align-items-center">
-        <LabelPropsEditor {labelProps} onChange={onUpdateLabelProps} />
-
-        <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={onCsvPlaceholderPicked} />
-
-        <SavedLabelsMenu
-          canvas={fabricCanvas!}
-          onRequestLabelTemplate={exportCurrentLabel}
-          {onLoadRequested}
-          {csvEnabled} />
-
         <button class="btn btn-sm btn-outline-danger shadow-sm bg-body" onclick={clearCanvas} title={$tr("editor.clear")}>
           <MdIcon icon="cancel_presentation" />
         </button>
@@ -469,65 +468,63 @@
           <MdIcon icon="redo" />
         </button>
       </div>
+
+      <!-- Contextual Edit Row (Moved to Top) -->
+      {#if selectedCount > 0}
+        <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center mt-3 p-2 rounded border border-warning-subtle bg-warning-subtle text-warning-emphasis bg-opacity-10 w-100">
+          <button class="btn btn-sm btn-danger shadow-sm" onclick={deleteSelected} title={$tr("editor.delete")}>
+            <MdIcon icon="delete" />
+          </button>
+          <button class="btn btn-sm btn-secondary shadow-sm" onclick={cloneSelected} title={$tr("editor.clone")}>
+            <MdIcon icon="content_copy" />
+          </button>
+
+          {#if selectedObject && selectedCount === 1}
+            <GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+          {/if}
+
+          {#if selectedObject}
+            <VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+          {/if}
+
+          {#if selectedObject instanceof fabric.IText}
+            <TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+          {/if}
+
+          {#if selectedObject instanceof QRCode}
+            <QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+          {/if}
+
+          {#if selectedObject instanceof Barcode}
+            <BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+          {/if}
+
+          {#if selectedObject instanceof fabric.IText || selectedObject instanceof QRCode || (selectedObject instanceof Barcode && selectedObject.encoding === "CODE128B")}
+            <VariableInsertControl {selectedObject} valueUpdated={controlValueUpdated} />
+          {/if}
+        </div>
+      {/if}
     </div>
   </div>
 
-  <div class="row mb-3">
-    <div class="col">
-      <div class="controls-panel d-flex flex-column gap-3">
-        <!-- Main Actions Row (Add + Print) -->
-        <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center p-2 rounded bg-body-tertiary">
-          <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
-          <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} />
-          
-          <div class="vr mx-1"></div>
-          
-          <button class="btn btn-sm btn-outline-primary" onclick={openPreview} title={$tr("editor.preview")}>
-            <MdIcon icon="visibility" />
-          </button>
-          <button
-            title="Print with default or saved parameters"
-            class="btn btn-sm btn-primary shadow-sm"
-            onclick={openPreviewAndPrint}
-            disabled={$connectionState !== "connected"}><MdIcon icon="print" /> {$tr("editor.print")}
-          </button>
-        </div>
-
-        <!-- Contextual Edit Row -->
-        {#if selectedCount > 0}
-          <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center p-2 rounded border border-warning-subtle bg-warning-subtle text-warning-emphasis bg-opacity-10">
-            <button class="btn btn-sm btn-danger shadow-sm" onclick={deleteSelected} title={$tr("editor.delete")}>
-              <MdIcon icon="delete" />
-            </button>
-            <button class="btn btn-sm btn-secondary shadow-sm" onclick={cloneSelected} title={$tr("editor.clone")}>
-              <MdIcon icon="content_copy" />
-            </button>
-
-            {#if selectedObject && selectedCount === 1}
-              <GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-            {/if}
-
-            {#if selectedObject}
-              <VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-            {/if}
-
-            {#if selectedObject instanceof fabric.IText}
-              <TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-            {/if}
-
-            {#if selectedObject instanceof QRCode}
-              <QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-            {/if}
-
-            {#if selectedObject instanceof Barcode}
-              <BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-            {/if}
-
-            {#if selectedObject instanceof fabric.IText || selectedObject instanceof QRCode || (selectedObject instanceof Barcode && selectedObject.encoding === "CODE128B")}
-              <VariableInsertControl {selectedObject} valueUpdated={controlValueUpdated} />
-            {/if}
-          </div>
-        {/if}
+  <!-- Bottom Main Actions Container -->
+  <div class="bottom-actions sticky-bottom bg-body border-top pt-3 pb-3 mt-4">
+    <div class="container-fluid">
+      <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center p-2 rounded bg-body-tertiary shadow-sm mx-auto" style="max-width: 600px;">
+        <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
+        <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} />
+        
+        <div class="vr mx-1"></div>
+        
+        <button class="btn btn-sm btn-outline-primary" onclick={openPreview} title={$tr("editor.preview")}>
+          <MdIcon icon="visibility" />
+        </button>
+        <button
+          title="Print with default or saved parameters"
+          class="btn btn-sm btn-primary shadow-sm"
+          onclick={openPreviewAndPrint}
+          disabled={$connectionState !== "connected"}><MdIcon icon="print" /> {$tr("editor.print")}
+        </button>
       </div>
     </div>
   </div>
@@ -556,5 +553,12 @@
   }
   .canvas-wrapper canvas {
     image-rendering: pixelated;
+  }
+  .bottom-actions {
+    z-index: 990; /* below dropdown-menu (1000) */
+    margin-left: -1rem; /* Negate container padding if necessary */
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 </style>
