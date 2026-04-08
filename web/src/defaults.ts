@@ -80,9 +80,64 @@ export const THUMBNAIL_HEIGHT = 48;
 /** Generate thumbnail in jpeg format with this quality */
 export const THUMBNAIL_QUALITY = 0.7;
 
+/** Standard Open-Source fonts (available via Google Fonts) */
+export const STANDARD_FONTS = [
+  "Abel",
+  "Alfa Slab One",
+  "Anton",
+  "Archivo Black",
+  "Arvo",
+  "Bebas Neue",
+  "Black Ops One",
+  "Bree Serif",
+  "Bungee",
+  "Caveat",
+  "Chivo",
+  "Cinzel",
+  "Comfortaa",
+  "Courier Prime",
+  "Dancing Script",
+  "Exo 2",
+  "Fira Sans",
+  "Great Vibes",
+  "IBM Plex Sans",
+  "Inconsolata",
+  "Inter",
+  "Josefin Sans",
+  "Kanit",
+  "Lato",
+  "Lora",
+  "Luckiest Guy",
+  "Merriweather",
+  "Montserrat",
+  "Nunito",
+  "Oleo Script",
+  "Open Sans",
+  "Oswald",
+  "Pacifico",
+  "Patua One",
+  "Permanent Marker",
+  "Playball",
+  "Playfair Display",
+  "Poppins",
+  "PT Sans",
+  "Public Sans",
+  "Questrial",
+  "Raleway",
+  "Roboto",
+  "Roboto Mono",
+  "Shadows Into Light",
+  "Silkscreen",
+  "Space Grotesk",
+  "Special Elite",
+  "Stardos Stencil",
+  "Ubuntu"
+].sort();
+
 export const APP_CONFIG_DEFAULTS: AppConfig = {
   fitMode: "stretch",
-  iconListMode: "both"
+  iconListMode: "both",
+  lastFontFamily: OBJECT_DEFAULTS_TEXT.fontFamily,
 };
 
 export const CSV_DEFAULT = "var1,var2\n123,456\n777,888";

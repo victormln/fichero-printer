@@ -1,4 +1,6 @@
 import * as fabric from "fabric";
+import { get } from "svelte/store";
+import { appConfig } from "$/stores";
 import { OBJECT_DEFAULTS, OBJECT_DEFAULTS_TEXT, OBJECT_DEFAULTS_VECTOR, OBJECT_SIZE_DEFAULTS } from "$/defaults";
 import Barcode from "$/fabric-object/barcode";
 import { QRCode } from "$/fabric-object/qrcode";
@@ -85,6 +87,7 @@ export class LabelDesignerObjectHelper {
   static addText(canvas: fabric.Canvas, text?: string, options?: Partial<TextboxExtProps>): TextboxExt {
     const obj = new TextboxExt(text ?? "Text", {
       ...OBJECT_DEFAULTS_TEXT,
+      fontFamily: get(appConfig).lastFontFamily ?? OBJECT_DEFAULTS_TEXT.fontFamily,
       ...(options as any),
     });
     canvas.add(obj);
@@ -95,6 +98,7 @@ export class LabelDesignerObjectHelper {
   static addStaticText(canvas: fabric.Canvas, text?: string, options?: Partial<fabric.TextProps>): fabric.FabricText {
     const obj = new fabric.FabricText(text ?? "Text", {
       ...OBJECT_DEFAULTS_TEXT,
+      fontFamily: get(appConfig).lastFontFamily ?? OBJECT_DEFAULTS_TEXT.fontFamily,
       ...(options as any),
     });
     canvas.add(obj);

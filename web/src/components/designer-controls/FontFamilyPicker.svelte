@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { OBJECT_DEFAULTS_TEXT } from "$/defaults";
+  import { OBJECT_DEFAULTS_TEXT, STANDARD_FONTS } from "$/defaults";
   import { tr } from "$/utils/i18n";
   import { Toasts } from "$/utils/toasts";
   import MdIcon from "$/components/basic/MdIcon.svelte";
   import { LocalStoragePersistence } from "$/utils/persistence";
-  import { fontCache, userFonts } from "$/stores";
+  import { appConfig, fontCache, userFonts } from "$/stores";
   import FontsMenu from "$/components/designer-controls/FontsMenu.svelte";
 
   interface Props {
@@ -17,6 +17,11 @@
   let { value, valueUpdated, editRevision }: Props = $props();
 
   let fontQuerySupported = typeof queryLocalFonts !== "undefined";
+ 
+  const onFontSelected = (family: string) => {
+    valueUpdated(family);
+    appConfig.update((c) => ({ ...c, lastFontFamily: family }));
+  };
 
   const getSystemFonts = async () => {
     try {
@@ -52,7 +57,7 @@
     class="form-control font-family-input"
     data-ver={editRevision}
     {value}
-    oninput={(e) => valueUpdated(e.currentTarget.value)} />
+    oninput={(e) => onFontSelected(e.currentTarget.value)} />
 
   <!-- svelte-ignore a11y_consider_explicit_label -->
   {#if $fontCache.length > 0 || $userFonts.length > 0}
@@ -66,11 +71,22 @@
             class="dropdown-item"
             style="font-family: {font.family}"
             type="button"
-            onclick={() => valueUpdated(font.family)}>
+            onclick={() => onFontSelected(font.family)}>
             {font.family}
           </button>
         {/each}
       {/if}
+
+      <h6 class="dropdown-header">{$tr("params.text.standard_fonts")}</h6>
+      {#each STANDARD_FONTS as family}
+        <button
+          class="dropdown-item"
+          style="font-family: {family}"
+          type="button"
+          onclick={() => onFontSelected(family)}>
+          {family}
+        </button>
+      {/each}
 
       {#if $fontCache.length > 0}
         <h6 class="dropdown-header">{$tr("params.text.system_fonts")}</h6>
@@ -79,7 +95,7 @@
             class="dropdown-item"
             style="font-family: {family}"
             type="button"
-            onclick={() => valueUpdated(family)}>
+            onclick={() => onFontSelected(family)}>
             {family}
           </button>
         {/each}
